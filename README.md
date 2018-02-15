@@ -113,9 +113,42 @@ $ curl "localhost:8080/bundles\
 To run tests:
 
 ```
-python -m pytest
+$ python -m pytest
 ```
 
+For load testing, make sure the server is running and:
+```
+$ locust -f tests/load/locustfile.py --host="http://localhost:8080" --no-web -c 1000 -r 100
+```
+This will simulate 1000 users being spawned at 100 users/second hitting the server concurrently.
+
+
+## Design & Discussion
+
+Service implemented with Falcon - a lightweight web framework.
+
+1. Service layer: receives and validates requests
+2. Business layer: business logic (not much of it right now)
+3. Data layer: reads and writes to the database (sqlite)
+
+Request body and query params are validated using Marshmallow, which allows you to define a schema to validate against. An example of a schema:
+
+```python
+class BundleSchema(Schema):
+    """
+    All Bundles should be shaped like this :)
+    """
+    device_uuid = fields.UUID(required=True)
+    sensor_type = fields.Str(
+        validate=OneOf(['temperature','humidity']),
+        required=True,
+        )
+    sensor_value = fields.Decimal(
+        validate=Range(min=0.0, max=100.0),
+        required=True,
+        )
+    sensor_reading_time = fields.Integer(required=True)
+```
 
 ## Built With
 
@@ -123,8 +156,10 @@ python -m pytest
 * [gevent](http://www.gevent.org/) - a coroutine-based Python networking library
 * [marshmallow](https://marshmallow.readthedocs.io/en/latest/) - simplified object serialization
 * [sqlalchemy](https://www.sqlalchemy.org/) - The Python SQL Toolkit and Object Relational Mapper
+* [locust](https://locust.io/) - An open source load testing tool
 
 
 ## Authors
 
-* **Brian Fernandez** - I took this way too seriously.
+* **Brian Fernandez**
+

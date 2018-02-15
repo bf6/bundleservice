@@ -1,5 +1,6 @@
 falcon==1.4.1
 gevent==1.2.2
+locustio==0.8.1
 marshmallow==2.15.0
 pytest==3.4.0
 SQLAlchemy==1.2.2
