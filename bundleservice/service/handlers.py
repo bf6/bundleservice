@@ -27,18 +27,32 @@ class BundlesHandler(object):
         """
         Handle GET /bundles/
         """
-        errors = GetBundlesParamsSchema().validate(data=req.params)
+        schema = GetBundlesParamsSchema()
+        errors = schema.validate(data=req.params)
         if errors:
             raise falcon.HTTPBadRequest(description=errors)
-        resp.context['result'] = Bundles.get(req.params)
+
+        resp.context['result'] = Bundles.get(
+            device_uuid=req.params['device_uuid'],
+            sensor_type=req.params['sensor_type'],
+            start_time=req.params['start_time'],
+            end_time=req.params['end_time'],
+            )
 
     def on_post(self, req, resp):
         """
         Handle POST /bundles/
         """
-        errors = BundleSchema().validate(data=req.media)
+        schema = BundleSchema()
+        errors = schema.validate(data=req.media)
         if errors:
             raise falcon.HTTPBadRequest(description=errors)
-        Bundles.create(req.media)
+
+        Bundles.create(
+            device_uuid=req.media['device_uuid'],
+            sensor_type=req.media['sensor_type'],
+            sensor_value=req.media['sensor_value'],
+            sensor_reading_time=req.media['sensor_reading_time'],
+            )
         resp.status = falcon.HTTP_201
         resp.context['result'] = {"message": "Resource created"}
